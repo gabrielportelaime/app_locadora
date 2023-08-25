@@ -10,10 +10,15 @@ class MarcaController extends Controller
     /**
      * Display a listing of the resource.
      */
+    public Marca $marca;
+    public function __construct(Marca $marca){
+        $this->marca = $marca;
+    }
     public function index()
     {
-        $marcas = Marca::all();
-        return $marcas;
+        // $marcas = Marca::all();
+        $marcas = $this->marca->all();
+        return response()->json($marcas, 200);
     }
 
     /**
@@ -29,15 +34,22 @@ class MarcaController extends Controller
      */
     public function store(Request $request)
     {
-        Marca::create($request->all());
+        $request->validate($this->marca->rules(), $this->marca->feedbacks());
+        //stateless
+        $marca = $this->marca->create($request->all());
+        return response()->json($marca, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Marca $marca)
+    public function show($id)
     {
-        return $marca;
+        $marca = $this->marca->find($id);
+        if($marca === null){
+            return response()->json(['erro' => 'A marca não foi encontrada!'], 404);
+        }
+        return response()->json($marca, 200);
     }
 
     /**
@@ -51,16 +63,26 @@ class MarcaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Marca $marca)
+    public function update(Request $request, $id)
     {
-        //
+        $marca = $this->marca->find($id);
+        if($marca === null){
+            return response()->json(['erro' => 'Não foi possível encontrar a marca!'], 404);
+        }
+        $marca->update($request->all());
+        return response()->json($marca, 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Marca $marca)
+    public function destroy($id)
     {
-        //
+        $marca = $this->marca->find($id);
+        if($marca === null){
+            return response()->json(['erro' => 'Impossível remover a marca, pois não existe!'], 404);
+        }
+        $marca->delete();
+        return response()->json(['msg' => 'A marca foi removida com sucesso!'], 200);
     }
 }
