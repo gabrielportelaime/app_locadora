@@ -36,7 +36,12 @@ class MarcaController extends Controller
     {
         $request->validate($this->marca->rules(), $this->marca->feedbacks());
         //stateless
-        $marca = $this->marca->create($request->all());
+        $imagem = $request->file('imagem');
+        $imagem_urn = $imagem->store('imagens', 'public');
+        $marca = $this->marca->create([
+            'nome' => $request->nome,
+            'imagem' => $imagem_urn
+        ]);
         return response()->json($marca, 201);
     }
 
@@ -69,7 +74,23 @@ class MarcaController extends Controller
         if($marca === null){
             return response()->json(['erro' => 'Não foi possível encontrar a marca!'], 404);
         }
-        $marca->update($request->all());
+        if($request->method() === 'PATCH'){
+            $regras_dinamicas = array();
+            foreach($marca->rules() as $input => $regra){
+                if(array_key_exists($input, $request->all())){
+                    $regras_dinamicas[$input] = $regra;
+                }
+            }
+            $request->validate($regras_dinamicas, $marca->feedbacks());
+        }else{
+            $request->validate($marca->rules(), $marca->feedbacks());
+        }
+        $imagem = $request->file('imagem');
+        $imagem_urn = $imagem->store('imagens', 'public');
+        $marca->update([
+            'nome' => $request->nome,
+            'imagem' => $imagem_urn
+        ]);
         return response()->json($marca, 200);
     }
 
