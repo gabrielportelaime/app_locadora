@@ -18,8 +18,7 @@ class MarcaController extends Controller
     public function index()
     {
         // $marcas = Marca::all();
-        $marcas = $this->marca->all();
-        return response()->json($marcas, 200);
+        return response()->json($this->marca->with('modelos')->get(), 200);
     }
 
     /**
@@ -38,7 +37,7 @@ class MarcaController extends Controller
         $request->validate($this->marca->rules(), $this->marca->feedbacks());
         //stateless
         $imagem = $request->file('imagem');
-        $imagem_urn = $imagem->store('imagens', 'public');
+        $imagem_urn = $imagem->store('imagens/marcas', 'public');
         $marca = $this->marca->create([
             'nome' => $request->nome,
             'imagem' => $imagem_urn
@@ -51,7 +50,7 @@ class MarcaController extends Controller
      */
     public function show($id)
     {
-        $marca = $this->marca->find($id);
+        $marca = $this->marca->with('modelos')->find($id);
         if($marca === null){
             return response()->json(['erro' => 'A marca não foi encontrada!'], 404);
         }
@@ -92,11 +91,15 @@ class MarcaController extends Controller
         }
 
         $imagem = $request->file('imagem');
-        $imagem_urn = $imagem->store('imagens', 'public');
-        $marca->update([
-            'nome' => $request->nome,
-            'imagem' => $imagem_urn
-        ]);
+        $imagem_urn = $imagem->store('imagens/marcas', 'public');
+        //preencher o objeto marca com os dados do request
+        $marca->fill($request->all());
+        $marca->imagem = $imagem_urn;
+        $marca->save();
+        // $marca->update([
+        //     'nome' => $request->nome,
+        //     'imagem' => $imagem_urn
+        // ]);
         return response()->json($marca, 200);
     }
 

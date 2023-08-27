@@ -24,4 +24,8 @@ class Marca extends Model
             'imagem.mimes' => 'O arquivo deve ser imagem do tipo png ou jpeg'
         ];
     }
+    public function modelos(){
+        //Uma marca possui muitos modelos
+        return $this->hasMany('App\Models\Modelo');
+    }
 }
