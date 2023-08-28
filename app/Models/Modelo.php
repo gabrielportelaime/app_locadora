@@ -11,7 +11,7 @@ class Modelo extends Model
     protected $fillable = ['marca_id', 'nome', 'imagem', 'numero_portas', 'lugares', 'air_bag', 'abs'];
     public function rules(){
         return [
-            'marca_id' => 'exists:marcas,id',
+            'marca_id' => 'required|exists:marcas,id',
             'nome' => 'required|unique:modelos,nome,'.$this->id.'|min:3|max:20',
             'imagem' => 'required|file|mimes:png,jpeg',
             'numero_portas' => 'required|integer|digits_between:1,5',

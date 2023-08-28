@@ -15,9 +15,29 @@ class ModeloController extends Controller
     public function __construct(Modelo $modelo){
         $this->modelo = $modelo;
     }
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json($this->modelo->with('marca')->get(), 200);
+        $modelos = array();
+        if($request->has('atributos_marca')){
+            $atributos_marca = $request->atributos_marca;
+            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+        }else{
+            $modelos = $this->modelo->with('marca');
+        }
+        if($request->has('filtro')){
+            $filtros = explode(';', $request->filtro);
+            foreach($filtros as $key => $condicao){
+                $filtro = explode(':', $condicao);
+                $modelos = $modelos->where($filtro[0], $filtro[1], $filtro[2]);
+            }
+        }
+        if($request->has('atributos')){
+            $atributos = $request->atributos;
+            $modelos = $modelos->selectRaw($atributos)->get();
+        }else{
+            $modelos = $modelos->get();
+        }
+        return response()->json($modelos, 200);
         //all -> criando um objeto de consulta e na sequência o get
         //get -> retorna uma collection também, mas há a possibilidade de modificar a consulta
     }
