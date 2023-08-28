@@ -41,13 +41,13 @@ class CarroController extends Controller
     public function store(Request $request)
     {
         $request->validate($this->carro->rules());
-        $marca = $this->carro->create([
+        $carro = $this->carro->create([
             'modelo_id' => $request->modelo_id,
             'placa' => $request->placa,
             'disponivel' => $request->disponivel,
             'km' => $request->km,
         ]);
-        return response()->json($marca, 201);
+        return response()->json($carro, 201);
     }
 
     /**
