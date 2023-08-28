@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Modelo;
+use App\Repositories\ModeloRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -17,42 +18,27 @@ class ModeloController extends Controller
     }
     public function index(Request $request)
     {
-        $modelos = array();
+        $modeloRepository = new ModeloRepository($this->modelo);
         if($request->has('atributos_marca')){
-            $atributos_marca = $request->atributos_marca;
-            $modelos = $this->modelo->with('marca:id,'.$atributos_marca);
+            $atributos_marca = 'marca:id,'.$request->atributos_marca;
+            $modeloRepository->selectAtributosRegistrosRelacionados($atributos_marca);
         }else{
-            $modelos = $this->modelo->with('marca');
+            $modeloRepository->selectAtributosRegistrosRelacionados('marca');
         }
         if($request->has('filtro')){
-            $filtros = explode(';', $request->filtro);
-            foreach($filtros as $key => $condicao){
-                $filtro = explode(':', $condicao);
-                $modelos = $modelos->where($filtro[0], $filtro[1], $filtro[2]);
-            }
+            $modeloRepository->filtro($request->filtro);
         }
         if($request->has('atributos')){
-            $atributos = $request->atributos;
-            $modelos = $modelos->selectRaw($atributos)->get();
-        }else{
-            $modelos = $modelos->get();
+            $modeloRepository->selectAtributos($request->atributos);
         }
-        return response()->json($modelos, 200);
-        //all -> criando um objeto de consulta e na sequência o get
-        //get -> retorna uma collection também, mas há a possibilidade de modificar a consulta
+        return response()->json($modeloRepository->getResultado(), 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate($this->modelo->rules());
@@ -71,9 +57,6 @@ class ModeloController extends Controller
         return response()->json($modelo, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $modelo = $this->modelo->with('marca')->find($id);
@@ -83,17 +66,11 @@ class ModeloController extends Controller
         return response()->json($modelo, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Modelo $modelo)
     {
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $modelo = $this->modelo->find($id);
@@ -121,21 +98,9 @@ class ModeloController extends Controller
         $modelo->fill($request->all());
         $modelo->imagem = $imagem_urn;
         $modelo->save();
-        // $modelo->update([
-        //     'marca_id' => $request->marca_id,
-        //     'nome' => $request->nome,
-        //     'imagem' => $imagem_urn,
-        //     'numero_portas' => $request->numero_portas,
-        //     'lugares' => $request->lugares,
-        //     'air_bag' => $request->air_bag,
-        //     'abs' => $request->abs,
-        // ]);
         return response()->json($modelo, 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $modelo = $this->modelo->find($id);
