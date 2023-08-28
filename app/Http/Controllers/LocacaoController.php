@@ -55,9 +55,13 @@ class LocacaoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Locacao $locacao)
+    public function show($id)
     {
-        //
+        $locacao = $this->locacao->find($id);
+        if($locacao === null){
+            return response()->json(['erro' => 'A locação não foi criada!'], 404);
+        }
+        return response()->json($locacao, 200);
     }
 
     /**
@@ -71,16 +75,39 @@ class LocacaoController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Locacao $locacao)
+    public function update(Request $request, $id)
     {
-        //
+        $locacao = $this->locacao->find($id);
+        if($locacao === null){
+            return response()->json(['erro' => 'Não foi possível encontrar a locação!'], 404);
+        }
+        if($request->method() === 'PATCH'){
+            $regras_dinamicas = array();
+            foreach($locacao->rules() as $input => $regra){
+                if(array_key_exists($input, $request->all())){
+                    $regras_dinamicas[$input] = $regra;
+                }
+            }
+            $request->validate($regras_dinamicas);
+        }else{
+            $request->validate($locacao->rules());
+        }
+        //preencher o objeto marca com os dados do request
+        $locacao->fill($request->all());
+        $locacao->save();
+        return response()->json($locacao, 200);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Locacao $locacao)
+    public function destroy($id)
     {
-        //
+        $locacao = $this->locacao->find($id);
+        if($locacao === null){
+            return response()->json(['erro' => 'Impossível remover a locação, pois não existe!'], 404);
+        }
+        $locacao->delete();
+        return response()->json(['msg' => 'A locação foi cancelada com sucesso!'], 200);
     }
 }
