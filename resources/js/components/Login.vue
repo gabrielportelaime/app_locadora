@@ -6,6 +6,7 @@
                 <div class="card-header">Login</div>
                 <div class="card-body">
                     <form method="POST" action="">
+                        <input type="hidden" name="_token" :value="token_csrf">
                         <div class="row mb-3">
                             <label for="email" class="col-md-4 col-form-label text-md-end">Email</label>
                             <div class="col-md-6">
@@ -46,4 +47,9 @@
 </div>
 </template>
 <script>
+    export default{
+        props:[
+            'token_csrf'
+        ] //análogo ao atributo (semelhante ao) data 
+    }
 </script>
