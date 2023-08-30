@@ -67,6 +67,15 @@ import axios from 'axios'
                 arquivoImagem: []
             }
         },
+        computed: {
+                token(){
+                    let token = document.cookie.split(';').find(indice => {
+                        return indice.startsWith('token=')
+                    })
+                    token = token.split('=')[1]
+                    return 'Bearer ' + token
+                }
+            },
         methods:{
             carregarImagem(e){
                 this.arquivoImagem = e.target.files
@@ -78,7 +87,8 @@ import axios from 'axios'
                 let config = {
                     headers: {
                         'Content-type': 'multipart/form-data',
-                        'Accept': 'application/json'
+                        'Accept': 'application/json',
+                        'Authorization': this.token
                     }
                 }
                 axios.post(this.urlBase, formData, config)
