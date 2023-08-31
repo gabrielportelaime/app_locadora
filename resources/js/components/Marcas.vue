@@ -26,10 +26,27 @@
                 <!-- inicio do card de listagem de marcas -->
                 <card-component titulo="Listagem de marcas">
                     <template v-slot:conteudo>
-                        <table-component :dados="marcas" :titulos="['ID', 'Nome da Marca', 'Logo da Marca']"></table-component>
+                        <table-component :dados="marcas.data" 
+                            :titulos="{
+                                id: {titulo: 'ID', tipo: 'texto'}, 
+                                nome: {titulo: 'Nome da Marca', tipo: 'texto'}, 
+                                imagem: {titulo: 'Logo da Marca', tipo: 'imagem'},
+                                created_at: {titulo: 'Data de Criação', tipo: 'data'}}">
+                        </table-component>
                     </template>
                     <template v-slot:rodape>
-                        <button type="button" class="btn btn-primary btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modalMarca">Adicionar</button>
+                        <div class="row">
+                            <div class="col-10">
+                                <paginate-component>
+                                    <li v-for="l, key in marcas.links" :key="key" class="page-item" @click="paginacao(l)">
+                                        <a class="page-link" href="#" v-html="l.label"></a>
+                                    </li>
+                                </paginate-component>
+                            </div>
+                            <div class="col">
+                                <button type="button" class="btn btn-primary btn-sm float-end" data-bs-toggle="modal" data-bs-target="#modalMarca">Adicionar</button>
+                            </div>
+                        </div>
                     </template>
                 </card-component>
                 <!-- fim do card de listagem de marcas -->
@@ -74,7 +91,7 @@ import axios from 'axios'
                 arquivoImagem: [],
                 transacaoStatus: '',
                 transacaoDetalhes: {},
-                marcas: []
+                marcas: {data: []},
             }
         },
         computed: {
@@ -87,6 +104,11 @@ import axios from 'axios'
                 }
             },
         methods:{
+            paginacao(l){
+                this.urlBase = l.url
+                this.carregarLista()
+                console.log(l.url)
+            },
             carregarLista(){
                 let config = {
                     headers: {
@@ -97,7 +119,6 @@ import axios from 'axios'
                 axios.get(this.urlBase, config)
                 .then(response => {
                     this.marcas = response.data
-                    console.log(this.marcas)
                 }).catch(errors => {
                     console.log(errors)
                 })
