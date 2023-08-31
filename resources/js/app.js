@@ -13,7 +13,9 @@ import { createApp } from 'vue';
  * to use in your application's views. An example is included for you.
  */
 
-const app = createApp({});
+const app = createApp({
+    
+});
 
 import ExampleComponent from './components/ExampleComponent.vue';
 import Login from './components/Login.vue';
@@ -56,3 +58,4 @@ app.component('paginate-component', Paginate);
  */
 
 app.mount('#app');
+
