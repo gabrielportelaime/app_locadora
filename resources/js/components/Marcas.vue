@@ -37,8 +37,16 @@
                                 dataToggle: 'modal',
                                 dataTarget: '#modalMarcaVisualizar'
                             }"
-                            :editar="false" 
-                            :remover="false" 
+                            :editar="{
+                                visivel: true,
+                                dataToggle: 'modal',
+                                dataTarget: '#modalMarcaEditar'
+                            }"
+                            :remover="{
+                                visivel: true,
+                                dataToggle: 'modal',
+                                dataTarget: '#modalMarcaRemover'
+                            }" 
                             :titulos="{
                                 id: { titulo: 'ID', tipo: 'texto' },
                                 nome: { titulo: 'Nome da Marca', tipo: 'texto' },
@@ -100,16 +108,44 @@
         <!-- INICIO DO MODAL DE VISUALIZAR MARCA -->
         <modal-component id="modalMarcaVisualizar" titulo="Visualizar Marca">
             <template v-slot:alertas>
-
             </template>
             <template v-slot:conteudo>
-                Teste
+                <input-container-component titulo="ID">
+                    <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+                </input-container-component>
+                <input-container-component titulo="Nome da Marca">
+                    <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+                </input-container-component>
+                <input-container-component titulo="Data de criação">
+                    <input type="text" class="form-control" :value="formatarData($store.state.item.created_at)" disabled>
+                </input-container-component>
+                <input-container-component titulo="Logo da marca">
+                    <img :src="'storage/'+$store.state.item.imagem" v-if="$store.state.item.imagem">
+                </input-container-component>
             </template>
             <template v-slot:rodape>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </template>
         </modal-component>
         <!-- FIM DO MODAL DE VISUALIZAR MARCA -->
+        <!-- INICIO DO MODAL DE REMOVER MARCA -->
+        <modal-component id="modalMarcaRemover" titulo="Remover Marca">
+            <template v-slot:alertas>
+            </template>
+            <template v-slot:conteudo>
+                <input-container-component titulo="ID">
+                    <input type="text" class="form-control" :value="$store.state.item.id" disabled>
+                </input-container-component>
+                <input-container-component titulo="Nome da Marca">
+                    <input type="text" class="form-control" :value="$store.state.item.nome" disabled>
+                </input-container-component>
+            </template>
+            <template v-slot:rodape>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-danger" @click="remover()">Excluir</button>
+            </template>
+        </modal-component>
+        <!-- FIM DO MODAL DE REMOVER MARCA -->
     </div>
 </template>
 
@@ -143,6 +179,13 @@ export default {
         }
     },
     methods: {
+        remover(){
+            console.log('Excluido')
+        },
+        formatarData(data){
+            const dataCriacao = new Date(data)
+            return dataCriacao.toLocaleDateString('pt-BR')
+        },
         pesquisar() {
             console.log(this.busca)
             let filtro = ''
