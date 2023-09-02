@@ -54,6 +54,8 @@ export default {
             return dataCriacao.toLocaleDateString('pt-BR')
         },
         setMarca(obj){
+            this.$store.state.transacao.status = ''
+            this.$store.state.transacao.mensagem = ''
             this.$store.state.item = obj
         }    
     },

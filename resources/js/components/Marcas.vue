@@ -131,8 +131,10 @@
         <!-- INICIO DO MODAL DE REMOVER MARCA -->
         <modal-component id="modalMarcaRemover" titulo="Remover Marca">
             <template v-slot:alertas>
+                <alert-component tipo="success" titulo="Sucesso!" :detalhes="$store.state.transacao" v-if="$store.state.transacao.status == 'sucesso'"></alert-component>
+                <alert-component tipo="danger" titulo="Erro!" :detalhes="$store.state.transacao" v-if="$store.state.transacao.status == 'erro'"></alert-component>
             </template>
-            <template v-slot:conteudo>
+            <template v-slot:conteudo v-if="$store.state.transacao.status != 'sucesso'">
                 <input-container-component titulo="ID">
                     <input type="text" class="form-control" :value="$store.state.item.id" disabled>
                 </input-container-component>
@@ -142,7 +144,7 @@
             </template>
             <template v-slot:rodape>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-danger" @click="remover()">Excluir</button>
+                <button type="button" class="btn btn-danger" @click="remover()" v-if="$store.state.transacao.status != 'sucesso'">Excluir</button>
             </template>
         </modal-component>
         <!-- FIM DO MODAL DE REMOVER MARCA -->
@@ -180,7 +182,28 @@ export default {
     },
     methods: {
         remover(){
-            console.log('Excluido')
+            let confirmacao = confirm('Deseja realmente remover o registro?')
+            if(!confirmacao){
+                return false
+            }
+            let formData = new FormData()
+            formData.append('_method', 'delete')
+            let config = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Authorization': this.token
+                }
+            }
+            let url = this.urlBase + '/' + this.$store.state.item.id
+            axios.post(url, formData, config)
+                .then(response => {
+                    this.$store.state.transacao.status = 'sucesso'
+                    this.$store.state.transacao.mensagem = response.data.msg
+                    this.carregarLista()    
+                }).catch(errors => {
+                    this.$store.state.transacao.status = 'erro'
+                    this.$store.state.transacao.mensagem = errors.response.data.erro
+                })
         },
         formatarData(data){
             const dataCriacao = new Date(data)
@@ -251,6 +274,7 @@ export default {
                         mensagem: 'ID do registro: ' + response.data.id
                     }
                     console.log(response)
+                    this.carregarLista()   
                 })
                 .catch(errors => {
                     this.transacaoStatus = 'erro'
