@@ -199,15 +199,6 @@ export default {
             busca: { id: '', nome: '' },
         }
     },
-    computed: {
-        token() {
-            let token = document.cookie.split(';').find(indice => {
-                return indice.startsWith('token=')
-            })
-            token = token.split('=')[1]
-            return 'Bearer ' + token
-        }
-    },
     methods: {
         atualizar(){
             let formData = new FormData()
@@ -219,9 +210,7 @@ export default {
             let url = this.urlBase + '/' + this.$store.state.item.id
             let config = {
                 headers: {
-                    'Accept': 'application/json',
                     'Content-Type': 'multipart/form-data',
-                    'Authorization': this.token
                 }
             }
             axios.post(url, formData, config)
@@ -245,14 +234,8 @@ export default {
             }
             let formData = new FormData()
             formData.append('_method', 'delete')
-            let config = {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': this.token
-                }
-            }
             let url = this.urlBase + '/' + this.$store.state.item.id
-            axios.post(url, formData, config)
+            axios.post(url, formData)
                 .then(response => {
                     this.$store.state.transacao.status = 'sucesso'
                     this.$store.state.transacao.mensagem = response.data.msg
@@ -288,22 +271,13 @@ export default {
         },
         paginacao(l) {
             if (l.url) {
-                // this.urlBase = l.url
                 this.urlPaginacao = l.url.split('?')[1]
                 this.carregarLista()
             }
-            // console.log(l.url)
         },
         carregarLista() {
             let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
-            // console.log(url)
-            let config = {
-                headers: {
-                    'Accept': 'application/json',
-                    'Authorization': this.token
-                }
-            }
-            axios.get(url, config)
+            axios.get(url)
                 .then(response => {
                     this.marcas = response.data
                 }).catch(errors => {
@@ -320,8 +294,6 @@ export default {
             let config = {
                 headers: {
                     'Content-type': 'multipart/form-data',
-                    'Accept': 'application/json',
-                    'Authorization': this.token
                 }
             }
             axios.post(this.urlBase, formData, config)
@@ -339,7 +311,6 @@ export default {
                         mensagem: errors.response.data.message,
                         dados: errors.response.data.errors
                     }
-                    // console.log(errors.response.data.message)
                 })
         }
     },
