@@ -11,6 +11,30 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
+axios.interceptors.request.use(
+    config => {
+        console.log('Interceptando o request', config)
+        return config
+    },
+    error => {
+        console.log('Erro na requisição', error)
+        return Promise.reject(error)
+    }
+)
+
+//interceptando as responsees da aplicação
+axios.interceptors.response.use(
+    response => {
+        console.log('Interceptando a resposta', response)
+        return response
+    },
+    error => {
+        console.log('Erro na resposta', error)
+        return Promise.reject(error)
+    }
+)
+
+
 /**
  * Echo exposes an expressive API for subscribing to channels and listening
  * for events that are broadcast by Laravel. Echo and event broadcasting

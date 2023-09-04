@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Storage;
 
 class MarcaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
+
     public Marca $marca;
     public function __construct(Marca $marca){
         $this->marca = $marca;
@@ -31,20 +29,12 @@ class MarcaController extends Controller
         if($request->has('atributos')){
             $marcaRepository->selectAtributos($request->atributos);
         }
-        return response()->json($marcaRepository->getResultadoPaginado(3), 200);
+        return response()->json($marcaRepository->getResultadoPaginado(5), 200);
     }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         //
     }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
         $request->validate($this->marca->rules(), $this->marca->feedbacks());
@@ -57,10 +47,6 @@ class MarcaController extends Controller
         ]);
         return response()->json($marca, 201);
     }
-
-    /**
-     * Display the specified resource.
-     */
     public function show($id)
     {
         $marca = $this->marca->with('modelos')->find($id);
@@ -69,18 +55,10 @@ class MarcaController extends Controller
         }
         return response()->json($marca, 200);
     }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Marca $marca)
     {
         //
     }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, $id)
     {
         $marca = $this->marca->find($id);
@@ -98,23 +76,16 @@ class MarcaController extends Controller
         }else{
             $request->validate($marca->rules(), $marca->feedbacks());
         }
-
+        $marca->fill($request->all());
         if($request->file('imagem')){
             Storage::disk('public')->delete($marca->imagem);
+            $imagem = $request->file('imagem');
+            $imagem_urn = $imagem->store('imagens/marcas', 'public');
+            $marca->imagem = $imagem_urn;
         }
-
-        $imagem = $request->file('imagem');
-        $imagem_urn = $imagem->store('imagens/marcas', 'public');
-        //preencher o objeto marca com os dados do request
-        $marca->fill($request->all());
-        $marca->imagem = $imagem_urn;
         $marca->save();
         return response()->json($marca, 200);
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy($id)
     {
         $marca = $this->marca->find($id);

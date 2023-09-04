@@ -6,7 +6,7 @@
                     <th scope="col" v-for="(t, key) in titulos" :key="key">
                         {{ t.titulo }}
                     </th>
-                    <th v-if="visualizar.visivel || editar.visivel || remover.visivel">
+                    <th v-if="visualizar.visivel || atualizar.visivel || remover.visivel">
                         Opções
                     </th>
                 </tr>
@@ -20,9 +20,9 @@
                             <img :src="'/storage/'+valor" :alt="valor" width="50" height="50"/>
                         </span>
                     </td>
-                    <td v-if="visualizar.visivel || editar.visivel || remover.visivel">
+                    <td v-if="visualizar.visivel || atualizar.visivel || remover.visivel">
                         <button v-if="visualizar.visivel" class="btn btn-outline-primary btn-sm" style="margin:5px" :data-bs-toggle="visualizar.dataToggle" :data-bs-target="visualizar.dataTarget" @click="setMarca(obj)">Visualizar</button>
-                        <button v-if="editar" class="btn btn-outline-secondary btn-sm" style="margin:5px" :data-bs-toggle="editar.dataToggle" :data-bs-target="editar.dataTarget" @click="setMarca(obj)">Editar</button>
+                        <button v-if="atualizar" class="btn btn-outline-secondary btn-sm" style="margin:5px" :data-bs-toggle="atualizar.dataToggle" :data-bs-target="atualizar.dataTarget" @click="setMarca(obj)">Atualizar</button>
                         <button v-if="remover" class="btn btn-outline-danger btn-sm" style="margin:5px" :data-bs-toggle="remover.dataToggle" :data-bs-target="remover.dataTarget" @click="setMarca(obj)">Remover</button>
                     </td>
                 </tr>
@@ -33,7 +33,10 @@
 
 <script>
 export default {
-    props: ["dados", "titulos", "visualizar", "remover", "editar"],
+    filters: {
+
+    },
+    props: ["dados", "titulos", "visualizar", "remover", "atualizar"],
     computed: {
         dadosFiltrados(){
             let campos = Object.keys(this.titulos)
@@ -56,6 +59,7 @@ export default {
         setMarca(obj){
             this.$store.state.transacao.status = ''
             this.$store.state.transacao.mensagem = ''
+            this.$store.state.transacao.dados = ''
             this.$store.state.item = obj
         }    
     },

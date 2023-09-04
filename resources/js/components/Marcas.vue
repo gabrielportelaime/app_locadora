@@ -37,10 +37,10 @@
                                 dataToggle: 'modal',
                                 dataTarget: '#modalMarcaVisualizar'
                             }"
-                            :editar="{
+                            :atualizar="{
                                 visivel: true,
                                 dataToggle: 'modal',
-                                dataTarget: '#modalMarcaEditar'
+                                dataTarget: '#modalMarcaAtualizar'
                             }"
                             :remover="{
                                 visivel: true,
@@ -101,7 +101,7 @@
             </template>
             <template v-slot:rodape>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
-                <button type="button" class="btn btn-primary" @click="salvar">Salvar</button>
+                <button type="button" class="btn btn-primary" @click="salvar()">Salvar</button>
             </template>
         </modal-component>
         <!-- FIM DO MODAL DE INCLUSÃO DE MARCA -->
@@ -148,6 +148,34 @@
             </template>
         </modal-component>
         <!-- FIM DO MODAL DE REMOVER MARCA -->
+        <!-- INICIO DO MODAL DE ATUALIZAÇÃO DE MARCA -->
+        <modal-component id="modalMarcaAtualizar" titulo="Atualizar Marca">
+            <template v-slot:alertas>
+                <alert-component tipo="success" titulo="Sucesso!" :detalhes="$store.state.transacao" v-if="$store.state.transacao.status == 'sucesso'"></alert-component>
+                <alert-component tipo="danger" titulo="Erro!" :detalhes="$store.state.transacao" v-if="$store.state.transacao.status == 'erro'"></alert-component>
+            </template>
+            <template v-slot:conteudo>
+                <div class="form-group">
+                    <input-container-component titulo="Nome da marca" id="atualizarNome" id-help="atualizarNomeHelp"
+                        texto-ajuda="Informe o nome da marca">
+                        <input type="text" class="form-control" id="atualizarNome" aria-describedby="atualizarNomeHelp"
+                            placeholder="Nome da marca" v-model="$store.state.item.nome">
+                    </input-container-component>
+                </div>
+                <div class="form-group">
+                    <input-container-component titulo="Imagem" id="atualizarImagem" id-help="atualizarImagemHelp"
+                        texto-ajuda="Selecione uma imagem no formato PNG">
+                        <input type="file" class="form-control" id="atualizarImagem" aria-describedby="atualizarImagemHelp"
+                            placeholder="Selecione uma imagem" @change="carregarImagem($event)">
+                    </input-container-component>
+                </div>
+            </template>
+            <template v-slot:rodape>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" @click="atualizar()">Atualizar</button>
+            </template>
+        </modal-component>
+        <!-- FIM DO MODAL DE ATUALIZAÇÃO DE MARCA -->
     </div>
 </template>
 
@@ -181,6 +209,35 @@ export default {
         }
     },
     methods: {
+        atualizar(){
+            let formData = new FormData()
+            formData.append('_method', 'patch')
+            formData.append('nome', this.$store.state.item.nome)
+            if(this.arquivoImagem[0]){
+                formData.append('imagem', this.arquivoImagem[0])
+            }
+            let url = this.urlBase + '/' + this.$store.state.item.id
+            let config = {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': this.token
+                }
+            }
+            axios.post(url, formData, config)
+                .then(response => {
+                    console.log(response)
+                    //Limpar o campo de seleção de arquivos
+                    atualizarImagem.value = ''
+                    this.$store.state.transacao.status = 'sucesso'
+                    this.$store.state.transacao.mensagem = 'Registro de marca atualizado com sucesso!'
+                    this.carregarLista()
+                }).catch(errors => {
+                    this.$store.state.transacao.status = 'erro'
+                    this.$store.state.transacao.mensagem = errors.response.data.message
+                    this.$store.state.transacao.dados = errors.response.data.errors
+                })
+        },
         remover(){
             let confirmacao = confirm('Deseja realmente remover o registro?')
             if(!confirmacao){
@@ -239,7 +296,7 @@ export default {
         },
         carregarLista() {
             let url = this.urlBase + '?' + this.urlPaginacao + this.urlFiltro
-            console.log(url)
+            // console.log(url)
             let config = {
                 headers: {
                     'Accept': 'application/json',
